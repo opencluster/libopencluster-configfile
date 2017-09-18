@@ -1,6 +1,6 @@
 // config.c
 
-#include "config.h"
+#include "opencluster-configfile.h"
 
 #include <assert.h>
 #include <fcntl.h>
