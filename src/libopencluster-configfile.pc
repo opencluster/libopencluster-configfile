@@ -1,0 +1,16 @@
+# libopencluster-configfile pkg-config 
+
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libopencluster-configfile
+Description: libopencluster-configfile is a simple general use library to parse config files.
+Version: 0.1
+Requires:
+Conflicts:
+Libs: -L${libdir} -lopencluster-configfile
+Libs.private: 
+Cflags: -I${includedir}
+

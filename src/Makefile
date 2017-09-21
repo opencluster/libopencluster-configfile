@@ -26,7 +26,9 @@ MANPATH=/usr/local/man
 
 all: $(WORKDIR)/$(LIBFILE)
 package: $(WORKDIR)/$(LIBNAME)-$(LIBVER).tar.gz
-src: $(WORKDIR)/$(LIBNAME)-src-$(LIBVER).tar.gz
+src: $(WORKDIR)/$(LIBNAME)-$(LIBVER)-src.tar.gz
+
+static: $(WORKDIR)/$(LIBNAME)-$(LIBVER)-static.tar.gz
 
 
 # Need to be able to make 'man-pages' as well.  Not sure where to get the source for those... 
@@ -50,29 +52,34 @@ $(WORKDIR)/$(LIBFILE): $(WORKDIR)/$(LIBNAME).o
 	gcc -shared -Wl,-soname,$(SONAME) -o $@ $^
 
 
-$(WORKDIR)/$(LIBNAME)-src-$(LIBVER).tar.gz: $(SRCFILE) $(INCFILE) Makefile
+$(WORKDIR)/$(LIBNAME)-$(LIBVER)-src.tar.gz: $(SRCFILE) $(INCFILE) Makefile
 	@echo "Making: $@"
-	@-[ ! -d $(WORKDIR) ] && mkdir $(WORKDIR)
-	@-[ -e $@ ] && rm $@
+	@-test ! -d $(WORKDIR) || mkdir $(WORKDIR)
+	@-test ! -e $@ || rm $@
 	tar zcf $@ $^
 
-$(WORKDIR)/$(LIBNAME)-$(LIBVER).tar.gz: $(WORKDIR)/$(LIBFILE) $(INCFILE) $(LIBNAME).o
+$(WORKDIR)/$(LIBNAME)-$(LIBVER).tar.gz: $(WORKDIR)/$(LIBFILE) $(INCFILE) $(WORKDIR)/$(LIBNAME).o
 	@echo "Making: $@"
-	@-[ ! -d $(WORKDIR) ] && mkdir $(WORKDIR)
-	@-[ -e $@ ] && rm $@
+	@-[ -d $(WORKDIR) ] || mkdir $(WORKDIR)
+	@-test ! -e $@ || rm $@
 	tar zcf $@ $^
 
+$(WORKDIR)/$(LIBNAME)-$(LIBVER)-static.tar.gz: $(WORKDIR)/$(LIBNAME).o $(INCFILE)
+	@echo "Making: $@"
+	@-[ -d $(WORKDIR) ] || mkdir $(WORKDIR)
+	@-test ! -e $@ || rm $@
+	tar zcf $@ $^
 
 install: $(WORKDIR)/$(LIBFILE)
 	cp $(WORKDIR)/$(LIBFILE) $(LIBDIR)/
-	@-test -e $(LIBDIR)/$(MAINFILE) && rm $(LIBDIR)/$(MAINFILE)
+	@rm $(LIBDIR)/$(MAINFILE)
 	ln -s $(LIBDIR)/$(LIBFILE) $(LIBDIR)/$(MAINFILE)
 	ldconfig
 
 
-
-install_dev: $(INCFILE)
+install_dev: $(INCFILE) $(LIBNAME).pc
 	cp $(INCFILE) $(INCDIR)/
+	cp $(LIBNAME).pc /usr/lib/pkgconfig/
 
 
 man-pages: manpages/libopencluster-auth.3 
@@ -86,9 +93,9 @@ man-pages: manpages/libopencluster-auth.3
 
 
 uninstall:
-	@-test -e $(LIBDIR)/$(LIBFILE) && rm $(LIBDIR)/$(LIBFILE)
-	@-test -e $(LIBDIR)/$(MAINFILE) && rm $(LIBDIR)/$(MAINFILE)
+	@-rm $(LIBDIR)/$(LIBFILE)
+	@-rm $(LIBDIR)/$(MAINFILE)
 
 clean:
-	@-[ -e $(WORKDIR)/$(LIBNAME).o ] && rm $(WORKDIR)/$(LIBNAME).o
-	@-[ -e $(WORKDIR)/$(LIBNAME).so* ] && rm $(WORKDIR)/$(LIBNAME).so*
+	@-rm $(WORKDIR)/$(LIBNAME).o
+	@-rm $(WORKDIR)/$(LIBNAME).so*

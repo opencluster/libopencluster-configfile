@@ -21,11 +21,9 @@ typedef struct {
 
 
 typedef struct {
-
 	int items;
 	config_pair_t *pairs;
-	const char *path;
-	
+	char *path;
 } config_t;
 
 
